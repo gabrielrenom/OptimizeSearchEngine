@@ -58,7 +58,7 @@ namespace ConstructionLine.CodingChallenge.Tests
 
                 var expectedColorCount = shirts
                     .Count(c => c.Color.Id == color.Id  
-                                && (!searchOptions.Sizes.Any() || searchOptions.Sizes.Select(s => s.Id).Contains(c.Size.Id)));
+                                && (!searchOptions.Colors.Any() || searchOptions.Colors.Select(s => s.Id).Contains(c.Color.Id)));
 
                 Assert.That(colorCount.Count, Is.EqualTo(expectedColorCount),
                     $"Color count for '{colorCount.Color.Name}' showing '{colorCount.Count}' should be '{expectedColorCount}'");

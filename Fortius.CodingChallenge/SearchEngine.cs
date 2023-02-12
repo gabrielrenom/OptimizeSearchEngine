@@ -61,21 +61,24 @@ namespace ConstructionLine.CodingChallenge
             }
 
             // Use the index to optimize the search
+            var colorCounts = new List<ColorCount>();
             if (options.Colors.Count > 0 && options.Sizes.Count > 0)
             {
                 shirts = options.Colors.SelectMany(color => options.Sizes.Select(size => Tuple.Create(color, size)))
                                     .Where(key => _index.ContainsKey(key))
                                     .SelectMany(key => _index[key])
                                     .ToList();
+
+                colorCounts = shirts.GroupBy(s => s.Color)
+                                      .Select(g => new ColorCount
+                                      {
+                                          Color = g.Key,
+                                          Count = g.Count()
+                                      })
+                                      .ToList();
+
             }
 
-            var colorCounts = shirts.GroupBy(s => s.Color)
-                                    .Select(g => new ColorCount
-                                    {
-                                        Color = g.Key,
-                                        Count = g.Count()
-                                    })
-                                    .ToList();
 
             var sizeCounts = shirts.GroupBy(s => s.Size)
                                    .Select(g => new SizeCount
