@@ -57,8 +57,12 @@ namespace ConstructionLine.CodingChallenge.Tests
                 Assert.That(colorCount, Is.Not.Null, $"Color count for '{color.Name}' not found in results");
 
                 var expectedColorCount = shirts
-                    .Count(c => c.Color.Id == color.Id  
-                                && (!searchOptions.Colors.Any() || searchOptions.Colors.Select(s => s.Id).Contains(c.Color.Id)));
+                    .Count(c => c.Color.Id == color.Id
+                                && (!searchOptions.Colors.Any() || searchOptions.Colors.Select(s => s.Id).Contains(c.Color.Id))); ;
+
+                //var expectedColorCount = shirts
+                //    .Count(c => c.Color.Id == color.Id
+                //                && (!searchOptions.Sizes.Any() || searchOptions.Sizes.Select(s => s.Id).Contains(c.Size.Id)));
 
                 Assert.That(colorCount.Count, Is.EqualTo(expectedColorCount),
                     $"Color count for '{colorCount.Color.Name}' showing '{colorCount.Count}' should be '{expectedColorCount}'");

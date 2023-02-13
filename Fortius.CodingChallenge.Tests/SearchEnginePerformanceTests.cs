@@ -10,7 +10,7 @@ namespace ConstructionLine.CodingChallenge.Tests
     public class SearchEnginePerformanceTests : SearchEngineTestsBase
     {
         private List<Shirt> _shirts;
-        private SearchEngineBasic _searchEngine;
+        private SearchEngine _searchEngine;
 
         [SetUp]
         public void Setup()
@@ -19,7 +19,7 @@ namespace ConstructionLine.CodingChallenge.Tests
 
             _shirts = dataBuilder.CreateShirts();
 
-            _searchEngine = new SearchEngineBasic(_shirts);
+            _searchEngine = new SearchEngine(_shirts);
         }
 
 

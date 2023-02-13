@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ConstructionLine.CodingChallenge
 {
     /// <summary>
     /// Indexing is a way to optimize search by pre-computing the results of a search query and storing them in a data structure that allows for quick retrieval. This can significantly improve the performance of the search engine, especially for complex search options.
     /// </summary>
-    /// Yes, you can add caching to improve the performance of the search engine. Caching can be used to store the results of expensive computations and retrieval operations, so that subsequent requests for the same information can be served much faster. You can use a cache store, such as a Dictionary or a Hashtable, to store the results of each search query, along with the corresponding search options. Before performing a new search, you can check if the results for the same search options are already available in the cache, and if so, return the cached results instead of performing a new search. This can significantly improve the speed of the search engine, especially if you expect a large number of repeated search requests.
+    /// Caching can be used to store the results of expensive computations and retrieval operations, so that subsequent requests for the same information can be served much faster. You can use a cache store, such as a Dictionary or a Hashtable, to store the results of each search query, along with the corresponding search options. Before performing a new search, you can check if the results for the same search options are already available in the cache, and if so, return the cached results instead of performing a new search. This can significantly improve the speed of the search engine, especially if you expect a large number of repeated search requests.
     public class SearchEngine
     {
         private readonly List<Shirt> _shirts;
@@ -20,17 +21,20 @@ namespace ConstructionLine.CodingChallenge
             _cache = new Dictionary<SearchOptions, SearchResults>();
             _index = new Dictionary<Tuple<Color, Size>, List<Shirt>>();
             //_shirts.Sort((x, y) => x.Size.CompareTo(y.Size));
-           
+
             // Build the index
-            foreach (var shirt in _shirts)
+            Parallel.ForEach(_shirts, shirt =>
             {
                 var key = Tuple.Create(shirt.Color, shirt.Size);
-                if (!_index.ContainsKey(key))
+                lock (_index)
                 {
-                    _index[key] = new List<Shirt>();
+                    if (!_index.ContainsKey(key))
+                    {
+                        _index[key] = new List<Shirt>();
+                    }
                 }
                 _index[key].Add(shirt);
-            }
+            });
         }
 
         public List<SearchResults> BatchSearch(List<SearchOptions> options)
@@ -70,15 +74,15 @@ namespace ConstructionLine.CodingChallenge
                                     .ToList();
 
                 colorCounts = shirts.GroupBy(s => s.Color)
-                                      .Select(g => new ColorCount
-                                      {
-                                          Color = g.Key,
-                                          Count = g.Count()
-                                      })
-                                      .ToList();
-
+                                    .Select(g => new ColorCount
+                                    {
+                                        Color = g.Key,
+                                        Count = g.Count()
+                                    })
+                                    .ToList();
             }
 
+          
 
             var sizeCounts = shirts.GroupBy(s => s.Size)
                                    .Select(g => new SizeCount
@@ -95,14 +99,26 @@ namespace ConstructionLine.CodingChallenge
                 SizeCounts = sizeCounts
             };
 
-    
+
             // Adding not matched colors
-            Color.All.Where(color => results.ColorCounts.FirstOrDefault(x => x.Color.Name == color.Name) == null).ToList()
-                .ForEach(color => results.ColorCounts.Add(new ColorCount { Count = 0, Color = color }));
+            var colors = Color.All.Where(color => results.ColorCounts.FirstOrDefault(x => x.Color.Name == color.Name) == null).ToList();
+            Parallel.ForEach(colors, color =>
+            {
+                lock (results.ColorCounts)
+                {
+                    results.ColorCounts.Add(new ColorCount { Count = 0, Color = color });
+                }
+            });
 
             // Adding not matched sizes
-            Size.All.Where(size => results.SizeCounts.FirstOrDefault(x => x.Size.Name == size.Name) == null).ToList()
-                .ForEach(size => results.SizeCounts.Add(new SizeCount { Count = 0, Size = size }));
+            var sizes = Size.All.Where(size => results.SizeCounts.FirstOrDefault(x => x.Size.Name == size.Name) == null).ToList();
+            Parallel.ForEach(sizes, size =>
+            {
+                lock (results.SizeCounts)
+                {
+                    results.SizeCounts.Add(new SizeCount { Count = 0, Size = size });
+                }
+            });
 
             // Add the results to the cache
             _cache[options] = results;

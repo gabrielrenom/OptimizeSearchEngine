@@ -58,6 +58,10 @@ namespace Fortius.CodingChallenge.Tests
 
             var results = searchEngine.Search(searchOptions);
 
+
+            AssertColorCounts(shirts, searchOptions, results.ColorCounts);
+
+
             Assert.IsTrue(results.ColorCounts.FirstOrDefault(x=>x.Color== Color.Red)!=null);
             Assert.IsTrue(results.ColorCounts.FirstOrDefault(x=>x.Color== Color.White)!=null);
             Assert.IsTrue(results.ColorCounts.FirstOrDefault(x=>x.Color== Color.Black)!=null);
